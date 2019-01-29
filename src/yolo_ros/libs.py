@@ -1,7 +1,7 @@
 import rospy
 import numpy as np
-from yolo_tf.msg import *
-from yolo_tf.srv import *
+from yolo_ros.msg import *
+from yolo_ros.srv import *
 
 class TreeReader(object):
     def __init__(self, srv_name='get_names'):
