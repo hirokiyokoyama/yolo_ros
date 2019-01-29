@@ -1,0 +1,9 @@
+int32 row
+int32 column
+int32 box_index
+float32 top
+float32 left
+float32 bottom
+float32 right
+float32 objectness
+float32[] class_probability

@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="yolo_tf" type="yolo_9000_and_known.py" name="yolo_9000_and_known" args="$(find yolo_tf)/data/yolo9000.ckpt $(find yolo_tf)/data/9k.names $(find yolo_tf)/data/9k.tree $(find yolo_tf)/data/foo.ckpt $(find yolo_tf)/data/foo.names" output = "screen">
+    <remap from="image" to="/hsrb/head_rgbd_sensor/rgb/image_rect_color"/>
+  </node>
+</launch>
