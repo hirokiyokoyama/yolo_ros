@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(yolo_tf)
+project(yolo_ros)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -111,7 +111,7 @@ generate_dynamic_reconfigure_options(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES yolo_tf
+#  LIBRARIES yolo_ros
   CATKIN_DEPENDS message_runtime cv_bridge rospy sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
@@ -128,24 +128,24 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(yolo_tf
-#   src/${PROJECT_NAME}/yolo_tf.cpp
+# add_library(yolo_ros
+#   src/${PROJECT_NAME}/yolo_ros.cpp
 # )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
-# add_dependencies(yolo_tf ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(yolo_ros ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(yolo_tf_node src/yolo_tf_node.cpp)
+# add_executable(yolo_ros_node src/yolo_ros_node.cpp)
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(yolo_tf_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_dependencies(yolo_ros_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(yolo_tf_node
+# target_link_libraries(yolo_ros_node
 #   ${catkin_LIBRARIES}
 # )
 
@@ -164,7 +164,7 @@ include_directories(
 #)
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS yolo_tf yolo_tf_node
+# install(TARGETS yolo_ros yolo_ros_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -189,13 +189,11 @@ include_directories(
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_yolo_tf.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_yolo_ros.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-find_package(OpenCV REQUIRED)
 

@@ -3,7 +3,7 @@
 import cv2
 import rospy
 import numpy as np
-from yolo_tf.msg import ObjectArray, Object3dArray, Object3dDesc
+from yolo_ros.msg import ObjectArray, Object3dArray, Object3dDesc
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image, CameraInfo
 from message_filters import ApproximateTimeSynchronizer, Subscriber

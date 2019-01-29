@@ -6,7 +6,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from nets import yolo_v3, yolo9000, yolo_loss
-from yolo_tf import box_iou
+from yolo_ros import box_iou
 import traceback
 #from tarinai import box_iou
 slim = tf.contrib.slim

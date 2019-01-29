@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from nets import yolo9000, yolo_loss
 from convert_ckpt_to_weights import write_int32, write_conv2d
-from yolo_tf import box_iou
+from yolo_ros import box_iou
 #from tarinai import box_iou
 slim = tf.contrib.slim
 

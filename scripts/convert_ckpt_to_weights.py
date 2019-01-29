@@ -22,7 +22,7 @@ def write_conv2d(f, weights, biases):
 
 if __name__ == '__main__':
     if len(sys.argv) < 5:
-        print 'Usage: rosrun yolo_tf convert_ckpt_to_weights.py ckpt_file num_classes num_boxes weights_file'
+        print 'Usage: rosrun yolo_ros convert_ckpt_to_weights.py ckpt_file num_classes num_boxes weights_file'
         quit()
         
     reader = tf.saver.NewCheckpointReader(sys.argv[1])

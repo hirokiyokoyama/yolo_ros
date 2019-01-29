@@ -7,10 +7,10 @@ import rospy
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from nets import yolo9000
-from yolo_tf.msg import ObjectArray, ObjectDesc, Feature, FeatureArray, TreeNode
-from yolo_tf.srv import GetNames, GetNamesResponse
-from yolo_tf.srv import DetectObjects, DetectObjectsResponse
-from yolo_tf.cfg import YoloDetectorConfig
+from yolo_ros.msg import ObjectArray, ObjectDesc, Feature, FeatureArray, TreeNode
+from yolo_ros.srv import GetNames, GetNamesResponse
+from yolo_ros.srv import DetectObjects, DetectObjectsResponse
+from yolo_ros.cfg import YoloDetectorConfig
 
 from dynamic_reconfigure.server import Server
 

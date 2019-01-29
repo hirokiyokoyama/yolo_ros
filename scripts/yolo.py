@@ -8,10 +8,10 @@ from sensor_msgs.msg import Image
 from std_srvs.srv import Empty, EmptyResponse
 from cv_bridge import CvBridge, CvBridgeError
 from nets import yolo, tiny_yolo_voc, yolo9000, yolo_v3
-from yolo_tf.msg import ObjectArray, ObjectDesc, Feature, FeatureArray, TreeNode
-from yolo_tf.srv import GetNames, GetNamesResponse
-from yolo_tf.srv import DetectObjects, DetectObjectsResponse
-from yolo_tf.cfg import YoloDetectorConfig
+from yolo_ros.msg import ObjectArray, ObjectDesc, Feature, FeatureArray, TreeNode
+from yolo_ros.srv import GetNames, GetNamesResponse
+from yolo_ros.srv import DetectObjects, DetectObjectsResponse
+from yolo_ros.cfg import YoloDetectorConfig
 
 from dynamic_reconfigure.server import Server
 

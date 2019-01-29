@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package>
-  <name>yolo_tf</name>
+  <name>yolo_ros</name>
   <version>0.0.0</version>
-  <description>The yolo_tf package</description>
+  <description>The yolo_ros package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="yokoyama@todo.todo">yokoyama</maintainer>
+  <maintainer email="hiroki.yokoyama@okadanet.org">Hiroki Yokoyama</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but mutiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/yolo_tf</url> -->
+  <!-- <url type="website">http://wiki.ros.org/yolo_ros</url> -->
 
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
@@ -46,14 +46,14 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>message_generation</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
-  <build_depend>opencv2</build_depend>
+  <build_depend>python-opencv</build_depend>
   <run_depend>cv_bridge</run_depend>
   <run_depend>rospy</run_depend>
   <run_depend>sensor_msgs</run_depend>
   <run_depend>std_msgs</run_depend>
   <run_depend>message_runtime</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
-  <run_depend>opencv2</run_depend>
+  <run_depend>python-opencv</run_depend>
 
 
 

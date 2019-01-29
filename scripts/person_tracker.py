@@ -4,9 +4,9 @@
 import rospy
 import numpy as np
 from geometry_msgs.msg import PointStamped
-from yolo_tf.msg import Object3dArray
+from yolo_ros.msg import Object3dArray
 from filterpy.kalman import FadingKalmanFilter
-from yolo_tf.libs import TreeReader
+from yolo_ros.libs import TreeReader
 import tf2_ros
 import tf2_geometry_msgs
 

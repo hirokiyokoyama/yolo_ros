@@ -3,11 +3,11 @@
 import cv2
 import rospy
 import numpy as np
-from yolo_tf.msg import ObjectArray, FeatureArray
+from yolo_ros.msg import ObjectArray, FeatureArray
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from message_filters import TimeSynchronizer, Subscriber
-from yolo_tf.srv import GetNames
+from yolo_ros.srv import GetNames
 
 bridge = CvBridge()
 
