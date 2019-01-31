@@ -60,12 +60,12 @@ def callback(image, objects):
     objs = []
     for obj in objects.objects:
         rospy.loginfo('objectness={}'.format(obj.objectness))
-        if obj.objectness < 0.35:
+        if obj.objectness < 0.2:
             continue
         name = None
         prob = 0.
         for _, _name, _prob in tr.trace_max(obj.class_probability):
-            if _prob > 0.1:
+            if obj.objectness * _prob > 0.1:
                 name = _name
                 prob = _prob
             else:
