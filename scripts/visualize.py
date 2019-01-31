@@ -14,6 +14,42 @@ bridge = CvBridge()
 tr = TreeReader()
 image_to_show = None
 
+def box_overlap(x1, w1, x2, w2):
+    l1 = x1 - w1/2
+    l2 = x2 - w2/2
+    left = max(l1, l2)
+    r1 = x1 + w1/2
+    r2 = x2 + w2/2
+    right = min(r1, r2)
+    return right - left
+
+def box_intersection(ax, ay, aw, ah, bx, by, bw, bh):
+    w = box_overlap(ax, aw, bx, bw)
+    h = box_overlap(ay, ah, by, bh)
+    if w < 0 or h < 0:
+        return 0
+    return w*h
+
+def box_union(ax, ay, aw, ah, bx, by, bw, bh):
+    i = box_intersection(ax, ay, aw, ah, bx, by, bw, bh)
+    u = aw*ah + bw*bh - i
+    return u
+
+def box_iou(ax, ay, aw, ah, bx, by, bw, bh):
+    i = box_intersection(ax, ay, aw, ah, bx, by, bw, bh)
+    u = aw*ah + bw*bh - i
+    return float(i)/u
+
+def obj_iou(obj1, obj2):
+    return box_iou((obj1.left + obj1.right)/2,
+                   (obj1.top + obj1.bottom)/2,
+                   obj1.right - obj1.left,
+                   obj1.bottom - obj1.top,
+                   (obj2.left + obj2.right)/2,
+                   (obj2.top + obj2.bottom)/2,
+                   obj2.right - obj2.left,
+                   obj2.bottom - obj2.top)
+
 def callback(image, objects):
     print 'callback'
     try:
@@ -21,6 +57,7 @@ def callback(image, objects):
     except CvBridgeError as e:
         rospy.logerr(e)
 
+    objs = []
     for obj in objects.objects:
         rospy.loginfo('objectness={}'.format(obj.objectness))
         if obj.objectness < 0.35:
@@ -34,10 +71,29 @@ def callback(image, objects):
             else:
                 name = _name
                 break
-        
-        cv2.rectangle(cv_image, (int(obj.left),int(obj.top)), (int(obj.right),int(obj.bottom)), (0,255,0), 3)
-        cv2.putText(cv_image, '{}: {}%'.format(name, int(obj.objectness*prob*100)),
-                    (int(obj.left),int(obj.top)), cv2.FONT_HERSHEY_PLAIN, 1., (0,0,255))
+
+        if objs:
+            iou = [obj_iou(obj, obj2) for obj2 in objs]
+            i = np.argmax(iou)
+            if iou[i] > .8:
+                if objs[i].objectness < obj.objectness:
+                    objs[i] = obj
+            else:
+                objs.append(obj)    
+        else:
+            objs.append(obj)
+
+    for obj in objs:
+        cv2.rectangle(cv_image, (int(obj.left),int(obj.top)), (int(obj.right),int(obj.bottom)), (64,128,256), 2)
+        text = '{}: {}%'.format(name, int(obj.objectness*prob*100))
+        font = cv2.FONT_HERSHEY_PLAIN
+        font_scale = 1.
+        thickness = 1
+        (w, h), base_line = cv2.getTextSize(text, font, font_scale, thickness)
+        h += base_line
+        cv2.rectangle(cv_image, (int(obj.left),int(obj.top)), (int(obj.left+w),int(obj.top+h)), (64,128,256), -1)
+        cv2.putText(cv_image, text,
+                    (int(obj.left),int(obj.top+h)), font, font_scale, (0,0,0), thickness)
         print '{} {}%'.format(name, int(obj.objectness*prob*100))
 
     global image_to_show
