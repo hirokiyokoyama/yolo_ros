@@ -73,10 +73,10 @@ def callback(image, objects):
                 break
 
         if objs:
-            iou = [obj_iou(obj, obj2) for obj2 in objs]
+            iou = [obj_iou(obj, obj2) for obj2, _, _ in objs]
             i = np.argmax(iou)
             if iou[i] > .6:
-                if objs[i].objectness < obj.objectness:
+                if objs[i][0].objectness < obj.objectness:
                     objs[i] = (obj, name, prob)
             else:
                 objs.append((obj, name, prob))
