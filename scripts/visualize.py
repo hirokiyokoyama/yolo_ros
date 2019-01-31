@@ -75,15 +75,15 @@ def callback(image, objects):
         if objs:
             iou = [obj_iou(obj, obj2) for obj2 in objs]
             i = np.argmax(iou)
-            if iou[i] > .8:
+            if iou[i] > .6:
                 if objs[i].objectness < obj.objectness:
-                    objs[i] = obj
+                    objs[i] = (obj, name, prob)
             else:
-                objs.append(obj)    
+                objs.append((obj, name, prob))
         else:
-            objs.append(obj)
+            objs.append((obj, name, prob))
 
-    for obj in objs:
+    for obj, name, prob in objs:
         cv2.rectangle(cv_image, (int(obj.left),int(obj.top)), (int(obj.right),int(obj.bottom)), (64,128,256), 2)
         text = '{}: {}%'.format(name, int(obj.objectness*prob*100))
         font = cv2.FONT_HERSHEY_PLAIN
