@@ -115,7 +115,10 @@ class Detector:
         msg = ObjectArray()
         if self.sess is None:
             return msg
+        t0 = rospy.Time.now()
         predictions = self.sess.run(fetch, {x: datum for x, datum in zip(self.ph_x, data)})
+        t1 = rospy.Time.now()
+        rospy.loginfo('Processing time: {} ms'.format((t1-t0).to_sec()*1000))
         n = len(self.bbox_pred)
         bbox_pred = predictions[:n]
         obj_prob = predictions[n:2*n]

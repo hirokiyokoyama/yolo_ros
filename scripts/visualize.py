@@ -59,7 +59,6 @@ def callback(image, objects):
 
     objs = []
     for obj in objects.objects:
-        rospy.loginfo('objectness={}'.format(obj.objectness))
         if obj.objectness < 0.2:
             continue
         name = None
