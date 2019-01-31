@@ -51,10 +51,6 @@ add_message_files(
   FILES
   ObjectDesc.msg
   ObjectArray.msg
-  Object3dDesc.msg
-  Object3dArray.msg
-  Feature.msg
-  FeatureArray.msg
   TreeNode.msg
 )
 
