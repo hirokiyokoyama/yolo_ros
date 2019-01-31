@@ -8,7 +8,7 @@ from sensor_msgs.msg import Image
 from std_srvs.srv import Empty, EmptyResponse
 from cv_bridge import CvBridge, CvBridgeError
 from nets import yolo, tiny_yolo_voc, yolo9000, yolo_v3
-from yolo_ros.msg import ObjectArray, ObjectDesc, Feature, FeatureArray, TreeNode
+from yolo_ros.msg import ObjectArray, ObjectDesc, TreeNode
 from yolo_ros.srv import GetNames, GetNamesResponse
 from yolo_ros.srv import DetectObjects, DetectObjectsResponse
 from yolo_ros.cfg import YoloDetectorConfig
@@ -256,34 +256,6 @@ class Classifier(Detector):
                 parent.children.append(i)
         return res
         
-class Embedding(Detector):
-    def __init__(self, typ, ckpt_file):
-        Detector.__init__(self, typ, ckpt_file)
-        self.embed_dim = 128
-        
-    def _make_graph(self):
-        ph_x = [tf.placeholder(tf.float32, shape=[None, None, None, c]) for c in self.feature_dims]
-        c = (self.embed_dim + 5) * self.num_boxes
-        bbox_pred = []
-        obj_prob = []
-        cls_score = []
-        for i, x in enumerate(ph_x):
-            if len(ph_x) == 1:
-                scope = None
-            else:
-                scope = 'embedding_%d' % i
-            out = tf.contrib.slim.conv2d(x, c, [1,1],
-                                         activation_fn=None, normalizer_fn=None,
-                                         scope=scope)
-            shape = tf.concat([tf.shape(out)[:-1],
-                               [self.num_boxes, self.embed_dim+5]], 0)
-            out = tf.reshape(out, shape)
-            bbox_pred.append(out[:,:,:,:,:4])
-            obj_prob.append(out[:,:,:,:,4])
-            cls_score.append(out[:,:,:,:,5:])
-
-        return ph_x, bbox_pred, obj_prob, cls_score
-
 class YoloDetector:
     def __init__(self, ckpt_file, names_file=None, tree_file=None,
                  input_shape=(416,416)):
@@ -338,14 +310,6 @@ class YoloDetector:
         for det in self.detectors:
             det.finalize()
 
-    def add_embedding(self, typ, ckpt_file,
-                      obj_topic = 'embedded_objects',
-                      obj_srv = 'detect_embedded_objects'):
-        det = Embedding(typ, ckpt_file)
-        det.pub = rospy.Publisher(obj_topic, ObjectArray, queue_size=10)
-        self.detectors.append(det)
-        rospy.Service(obj_srv, DetectObjects, lambda req: det.detect_objects(self, req))
-
     def callback(self, data):
         detectors = filter(lambda det: det.pub.get_num_connections()>0, self.detectors)
         if not detectors:
@@ -395,11 +359,11 @@ if __name__ == '__main__':
     parser.add_argument('--ckpt1', type=str, help='ckpt file for additional detector.')
     parser.add_argument('--names1', type=str, help='names file for additional detector.')
     parser.add_argument('--tree1', type=str, help='tree file for additional detector.')
-    parser.add_argument('--type1', type=str, help='type of additinal detector (classifier or embedding).')
+    parser.add_argument('--type1', type=str, help='type of additinal detector (currently only classifier).')
     parser.add_argument('--ckpt2', type=str, help='ckpt file for additional detector.')
     parser.add_argument('--names2', type=str, help='names file for additional detector.')
     parser.add_argument('--tree2', type=str, help='tree file for additional detector.')
-    parser.add_argument('--type2', type=str, help='type of additinal detector (classifier or embedding).')
+    parser.add_argument('--type2', type=str, help='type of additinal detector (currently only classifier).')
     args, _ = parser.parse_known_args()
 
     rospy.init_node('yolo')
@@ -411,7 +375,7 @@ if __name__ == '__main__':
         if typ is None:
             print 'Type is not specified.'
             quit()
-        if typ not in ['classifier', 'embedding']:
+        if typ not in ['classifier']:
             print 'Unknown type %s.' % typ
             quit()
         if ckpt is None:
@@ -423,10 +387,6 @@ if __name__ == '__main__':
                               obj_topic = 'known_objects',
                               obj_srv = 'detect_known_objects',
                               names_srv = 'get_names_known')
-        elif typ == 'embedding':
-            yd.add_embedding(yd.detectors[0].typ, ckpt,
-                             obj_topic = 'embedded_objects',
-                             obj_srv = 'detect_embedded_objects')
 
     rospy.Service('enable_yolo_detector', Empty, enable_yolo_detector)
     rospy.Service('disable_yolo_detector', Empty, disable_yolo_detector)
