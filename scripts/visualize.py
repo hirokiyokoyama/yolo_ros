@@ -65,7 +65,7 @@ def callback(image, objects):
         name = None
         prob = 0.
         for _, _name, _prob in tr.trace_max(obj.class_probability):
-            if obj.objectness * _prob > 0.1:
+            if obj.objectness * _prob > 0.2:
                 name = _name
                 prob = _prob
             else:
@@ -75,7 +75,7 @@ def callback(image, objects):
         if objs:
             iou = [obj_iou(obj, obj2) for obj2, _, _ in objs]
             i = np.argmax(iou)
-            if iou[i] > .6:
+            if iou[i] > .5:
                 if objs[i][0].objectness < obj.objectness:
                     objs[i] = (obj, name, prob)
             else:
