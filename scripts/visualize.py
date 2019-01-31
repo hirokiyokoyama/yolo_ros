@@ -63,7 +63,7 @@ def callback(image, objects):
         if obj.objectness < 0.2:
             continue
         name = None
-        prob = 0.
+        prob = 1.
         for _, _name, _prob in tr.trace_max(obj.class_probability):
             if obj.objectness * _prob > 0.2:
                 name = _name
@@ -94,7 +94,6 @@ def callback(image, objects):
         cv2.rectangle(cv_image, (int(obj.left),int(obj.top)), (int(obj.left+w),int(obj.top+h)), (64,128,256), -1)
         cv2.putText(cv_image, text,
                     (int(obj.left),int(obj.top+h)), font, font_scale, (0,0,0), thickness)
-        print '{} {}%'.format(name, int(obj.objectness*prob*100))
 
     global image_to_show
     image_to_show = cv_image
