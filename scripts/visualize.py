@@ -51,7 +51,6 @@ def obj_iou(obj1, obj2):
                    obj2.bottom - obj2.top)
 
 def callback(image, objects):
-    print 'callback'
     try:
         cv_image = bridge.imgmsg_to_cv2(image, 'bgr8')
     except CvBridgeError as e:
