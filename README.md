@@ -6,7 +6,7 @@ ROS package implementing [YOLO](https://pjreddie.com/yolo/) with TensorFlow.
 
 * Run the node as follows:
 ```bash
-      $ rosrun yolo_ros yolo.py --ckpt ~/..適当なパス../yolo9000.ckpt --names ~/..適当なパス../9k.names --tree ~/..適当なパス../9k.tree
+      $ rosrun yolo_ros yolo.py --ckpt /path/to/file/yolo9000.ckpt --names /path/to/file/9k.names --tree /path/to/file/9k.tree
 ```
 
 * It subscribes 'image' and publishes the result to 'objects'. It also provides a ROS service 'detect_objects' that processes images on demand.
