@@ -170,10 +170,10 @@ class Classifier(Detector):
         else:
             if typ == 'yolo':
                 self.num_classes = 80
-                self.net = lambda x, **args: [yolo]
+                self.net = lambda x, **args: [yolo(x)]
             elif typ == 'tiny-yolo-voc':
                 self.num_classes = 20
-                self.net = lambda x, **args: [tiny_yolo_voc]
+                self.net = lambda x, **args: [tiny_yolo_voc(x)]
             elif typ == 'yolo9000':
                 self.num_classes = 9418
                 self.net = lambda x, **args: [yolo9000(x, **args)]
