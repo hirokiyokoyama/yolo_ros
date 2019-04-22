@@ -376,13 +376,13 @@ if __name__ == '__main__':
         if typ is None and ckpt is None and names is None and tree is None:
             continue
         if typ is None:
-            print 'Type is not specified.'
+            print ('Type is not specified.')
             quit()
         if typ not in ['classifier']:
-            print 'Unknown type %s.' % typ
+            print ('Unknown type %s.' % typ)
             quit()
         if ckpt is None:
-            print 'ckpt file is not specified.'
+            print ('ckpt file is not specified.')
             quit()
         if typ == 'classifier':
             _typ = yd.detectors[0].typ
