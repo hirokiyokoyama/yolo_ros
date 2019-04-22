@@ -240,12 +240,12 @@ class Classifier(Detector):
             
         cls_prob = []
         for _cls_score in cls_score:
-	    _cls_prob = tf.reshape(_cls_score,[-1,self.num_classes])
+            _cls_prob = tf.reshape(_cls_score,[-1,self.num_classes])
             _cls_probs = tf.split(_cls_prob, group_sizes, 1)
             _cls_probs = [tf.nn.softmax(c) for c in _cls_probs]
             _cls_prob = tf.concat(_cls_probs, 1)
             _cls_prob = tf.reshape(_cls_prob, tf.shape(_cls_score))
-    	    cls_prob.append(_cls_prob)
+            cls_prob.append(_cls_prob)
 
         return ph_x, bbox_pred, obj_prob, cls_prob
             
