@@ -236,7 +236,8 @@ class Classifier(Detector):
                 obj_prob.append(out[:,:,:,:,4])
                 cls_score.append(out[:,:,:,:,5:])
                 
-        group_sizes = [self.group_begin[i+1] - self.group_begin[i] for i in xrange(len (self.group_begin)-1)]
+        group_sizes = [self.group_begin[i+1] - self.group_begin[i] \
+                       for i in range(len(self.group_begin)-1)]
             
         cls_prob = []
         for _cls_score in cls_score:
