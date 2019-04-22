@@ -127,15 +127,15 @@ class Detector:
 
         #rospy.loginfo('Maximum objectness: {}'.format(obj_prob.flat[box_inds[0]]))
         box_index = 0
-        for l in xrange(n):
+        for l in range(n):
             bbox = bbox_pred[l]
             objp = obj_prob[l]
             clsp = cls_prob[l]
             self.decoders[l].decode(bbox, orig_image.shape[1::-1])
             
-            for i in xrange(bbox.shape[1]):
-                for j in xrange(bbox.shape[2]):
-                    for k in xrange(bbox.shape[3]):
+            for i in range(bbox.shape[1]):
+                for j in range(bbox.shape[2]):
+                    for k in range(bbox.shape[3]):
                         if objp[0,i,j,k] < threshold:
                             continue
                         x, y, w, h = bbox[0,i,j,k]
@@ -190,7 +190,7 @@ class Classifier(Detector):
                 self.num_classes = len(self.names)
         else:
             if self.num_classes is not None:
-                self.names = ['class_%d' % i for i in xrange(self.num_classes)]
+                self.names = ['class_%d' % i for i in range(self.num_classes)]
             else:
                 raise ValueError('Names file must be specified.')
         if tree_file is not None:
