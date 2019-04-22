@@ -1,4 +1,4 @@
-from libs import *
+from .libs import *
 
 def box_overlap(x1, w1, x2, w2):
     l1 = x1 - w1/2
