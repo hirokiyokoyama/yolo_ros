@@ -183,9 +183,9 @@ class Classifier(Detector):
 
         if names_file is not None:
             with open(names_file, 'r') as f:
-                self.names = map(str.strip, f.readlines())
+                self.names = list(map(str.strip, f.readlines()))
             if self.num_classes is not None:
-                assert len(list(self.names)) == self.num_classes, 'Names file must have %d entries.' % self.num_classes
+                assert len(self.names) == self.num_classes, 'Names file must have %d entries.' % self.num_classes
             else:
                 self.num_classes = len(self.names)
         else:
