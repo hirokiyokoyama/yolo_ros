@@ -315,12 +315,10 @@ class YoloDetector:
             det.finalize()
 
     def callback(self, data):
-        detectors = filter(lambda det: det.pub.get_num_connections()>0, self.detectors)
+        detectors = list(filter(lambda det: det.pub.get_num_connections()>0, self.detectors))
+        detectors = list(filter(lambda det: det.sess is not None, detectors))
         if not detectors:
             return
-        for det in detectors:
-            if det.sess is None:
-                return
         result = self.process_imgmsg(data, detectors)
         for det, res in zip(detectors, result):
             det.pub.publish(res)
