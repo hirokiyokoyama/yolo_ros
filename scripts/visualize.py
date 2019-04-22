@@ -4,9 +4,9 @@ import cv2
 import rospy
 import numpy as np
 from yolo_ros.msg import ObjectArray
+from yolo_ros.srv import DetectObjects
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
-from message_filters import ApproximateTimeSynchronizer, TimeSynchronizer, Subscriber
 from yolo_ros.libs import TreeReader
 import time
 
@@ -50,12 +50,13 @@ def obj_iou(obj1, obj2):
                    obj2.right - obj2.left,
                    obj2.bottom - obj2.top)
 
-def callback(image, objects):
+def callback(image):
     try:
         cv_image = bridge.imgmsg_to_cv2(image, 'bgr8')
     except CvBridgeError as e:
         rospy.logerr(e)
 
+    objects = detect_objects(image).objects
     objs = []
     for obj in objects.objects:
         if obj.objectness < 0.2:
@@ -96,14 +97,13 @@ def callback(image, objects):
     global image_to_show
     image_to_show = cv_image
     
-rospy.init_node('yolo9000_visualizer')
-image_sub = Subscriber('image', Image)
-object_sub = Subscriber('objects', ObjectArray)
-sub = ApproximateTimeSynchronizer([image_sub, object_sub], 100, 100)
-sub.registerCallback(callback)
+rospy.init_node('yolo_visualizer')
+detect_objects = rospy.ServiceProxy('detect_objects', DetectObjects)
+image_sub = rospy.Subscriber('image', Image, callback)
 
 while not rospy.is_shutdown():
     img = image_to_show
     if img is not None:
         cv2.imshow('YOLO detection', img)
         cv2.waitKey(1)
+
