@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import tensorflow as tf
-from nets import Yolo
+from nets import Yolo, YoloOutputCodec
 from box import obj_iou
 
 import cv2
@@ -19,9 +19,10 @@ from dynamic_reconfigure.server import Server
 class YoloDetector:
     def __init__(self, ckpt_file, image_size=None, visualization=False):
         self.image_size = image_size
-        self.model = create_yolo(num_classes=1, num_boxes=1)
+        self.model = Yolo(num_classes=1, num_boxes=1)
         self.model.load_weights(ckpt_file)
         rospy.loginfo('Network was restored from {}.'.format(ckpt_file))
+        #rospy.loginfo('Test value: {}'.format(self.model(tf.ones([1,8,8,3])*0.5)[0,0,0,0]))
 
         self.codec = None
         self.bridge = CvBridge()
@@ -31,9 +32,10 @@ class YoloDetector:
         self.visualization = visualization
         self.visualized = None
 
-        self.obj_pub = rospy.Publisher('objects', ObjectArray, queue_size=10)
+        self.obj_pub = rospy.Publisher('objects', ObjectArray, queue_size=1)
         rospy.Service('detect_objects', DetectObjects, self.detect_objects)
-        self.image_sub = rospy.Subscriber('image', Image, self.callback)
+        self.image_sub = rospy.Subscriber('image', Image, self.callback,
+                                          queue_size=1, buff_size=1024*1024*4)
 
     def config(self, config, level):
         self.threshold = config["threshold"]
@@ -51,6 +53,13 @@ class YoloDetector:
         res, _ = self.process_imgmsg(req.image)
         return DetectObjectsResponse(objects=res)
 
+    @tf.function
+    def _run_tf(self, img):
+        image_batch = tf.expand_dims(tf.cast(img, tf.float32), 0) / 255. * 2. -1.
+        if self.image_size is not None:
+            image_batch = tf.image.resize(image_batch, self.image_size[::-1])
+        return self.model(image_batch)
+
     def process_imgmsg(self, imgmsg):
         if self.codec is None:
             if self.image_size is None:
@@ -67,11 +76,8 @@ class YoloDetector:
         except CvBridgeError as e:
             rospy.logerr(e)
 
-        image_batch = tf.expand_dims(cv_image, 0) / 255.
-        if self.image_size is not None:
-            image_batch = tf.image.resize(image_batch, self.image_size[::-1])
         t0 = rospy.Time.now()
-        pred = self.model(image_batch)
+        pred = self._run_tf(cv_image)
         t1 = rospy.Time.now()
         rospy.loginfo('Processing time: {} ms'.format((t1-t0).to_sec()*1000))
         msg = self.process_prediction(pred)
@@ -83,7 +89,7 @@ class YoloDetector:
         msg = ObjectArray()
         x, y, w, h, obj, cls = map(lambda x: x[0].numpy(), self.codec.decode(prediction))
 
-        rospy.loginfo('Maximum objectness: {}'.format(obj.max()))
+        rospy.loginfo('Maximum objectness: {}/{}'.format(obj.max(), self.threshold))
 
         box_index = 0
         for i in range(x.shape[0]):
@@ -91,46 +97,37 @@ class YoloDetector:
                 for k in range(x.shape[2]):
                     if obj[i,j,k] < self.threshold:
                         continue
-                    obj = ObjectDesc()
-                    obj.row = i
-                    obj.column = j
-                    obj.box_index = box_index
+                    objmsg = ObjectDesc()
+                    objmsg.row = i
+                    objmsg.column = j
+                    objmsg.box_index = box_index
                     box_index += 1
-                    obj.top = y[i,j,k]
-                    obj.left = x[i,j,k]
-                    obj.bottom = y[i,j,k]+h[i,j,k]
-                    obj.right = x[i,j,k]+w[i,j,k]
-                    obj.objectness = obj[i,j,k]
-                    obj.class_probability = cls[i,j,k]
-                    msg.objects.append(obj)
+                    objmsg.top = y[i,j,k]
+                    objmsg.left = x[i,j,k]
+                    objmsg.bottom = y[i,j,k]+h[i,j,k]
+                    objmsg.right = x[i,j,k]+w[i,j,k]
+                    objmsg.objectness = obj[i,j,k]
+                    objmsg.class_probability = cls[i,j,k]
+                    msg.objects.append(objmsg)
         return msg
 
     def visualize(self, img, msg):
         img = img.copy()
         objs = []
-        for obj in objects.objects:
+        for obj in msg.objects:
             if objs:
-                iou = [obj_iou(obj, obj2) for obj2, _, _ in objs]
+                iou = [obj_iou(obj, obj2) for obj2 in objs]
                 i = np.argmax(iou)
                 if iou[i] > .5:
-                    if objs[i][0].objectness < obj.objectness:
-                        objs[i] = (obj, prob)
+                    if objs[i].objectness < obj.objectness:
+                        objs[i] = obj
                 else:
-                    objs.append((obj, prob))
+                    objs.append(obj)
             else:
-                objs.append((obj, prob))
+                objs.append(obj)
 
-        for obj, prob in objs:
+        for obj in objs:
             cv2.rectangle(img, (int(obj.left),int(obj.top)), (int(obj.right),int(obj.bottom)), (64,128,256), 2)
-            #text = '{}: {}%'.format(name, int(obj.objectness*prob*100))
-            #font = cv2.FONT_HERSHEY_PLAIN
-            #font_scale = 1.
-            #thickness = 1
-            #(w, h), base_line = cv2.getTextSize(text, font, font_scale, thickness)
-            #h += base_line
-            #cv2.rectangle(cv_image, (int(obj.left),int(obj.top)), (int(obj.left+w),int(obj.top+h)), (64,128,256), -1)
-            #cv2.putText(cv_image, text,
-            #            (int(obj.left),int(obj.top+h)), font, font_scale, (0,0,0), thickness)
 
         return img        
 
@@ -147,6 +144,6 @@ if __name__ == '__main__':
     while not rospy.is_shutdown():
         img = yd.visualized
         if img is not None:
-            cv2.imshow('YOLO detection', img)
+            cv2.imshow('YOLO detection', img[:,:,::-1])
         cv2.waitKey(1)
 
