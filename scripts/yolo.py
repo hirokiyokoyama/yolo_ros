@@ -17,11 +17,11 @@ from yolo_ros.cfg import YoloDetectorConfig
 from dynamic_reconfigure.server import Server
 
 class YoloDetector:
-    def __init__(self, ckpt_file, image_size=None, visualization=False):
+    def __init__(self, ckpt, image_size=None, visualization=False):
         self.image_size = image_size
         self.model = create_yolo(num_classes=1, num_boxes=1)
-        self.model.load_weights(ckpt_file)
-        rospy.loginfo('Network was restored from {}.'.format(ckpt_file))
+        self.model.load_weights(ckpt)
+        rospy.loginfo('Network was restored from {}.'.format(ckpt))
 
         self.codec = None
         self.bridge = CvBridge()
@@ -135,6 +135,10 @@ class YoloDetector:
         return img        
 
 if __name__ == '__main__':
+    physical_devices = tf.config.experimental.list_physical_devices('GPU')
+    for k in range(len(physical_devices)):
+        tf.config.experimental.set_memory_growth(physical_devices[k], True)
+
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--ckpt', type=str, help='ckpt file.')
