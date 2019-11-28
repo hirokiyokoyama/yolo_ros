@@ -19,32 +19,34 @@ class Conv2D(layers.Conv2D):
     super(Conv2D, self).__init__(*args, **kwargs)
 
   def build(self, input_shape):
+    size = self.kernel_size[0] * self.kernel_size[1] * self.filters
+    self._normalization_constant = tf.math.sqrt(2./size)
     super(Conv2D, self).build(input_shape)
-    shape = self.kernel.shape.as_list()
-    self._normalization_constant = np.sqrt(2./(shape[0] * shape[1] * shape[2]))
   
   def call(self, x):
+    #if not self.built:
+    #  self.build(x.shape)
     x = x * self._normalization_constant
     x = super(Conv2D, self).call(x)
     return x
 
 class YoloOutputCodec(object):
   def __init__(self, image_size, anchors=DEFAULT_ANCHORS):
-    self._anchors = tf.reshape(anchors, [1,1,1,-1,2])
+    self._anchors = tf.reshape(tf.cast(anchors, tf.float32), [1,1,1,-1,2])
     self._img_w, self._img_h = image_size
 
   def decode(self, yolo_output):
     data = yolo_output
 
     # decode w and h
-    w, h = tf.unstack(tf.exp(data[:,:,:,:,2:]) * self._anchors, 4)
+    w, h = tf.unstack(tf.exp(data[:,:,:,:,2:4]) * self._anchors, axis=4)
 
     # decode x and y
-    _, grid_h, grid_w, _ = tf.unstack(tf.shape(data))
-    cx, cy = tf.unstack(tf.nn.sigmoid(data[:,:,:,:,:2]), 4)
+    _, grid_h, grid_w, _, _ = tf.unstack(tf.shape(data))
+    cx, cy = tf.unstack(tf.nn.sigmoid(data[:,:,:,:,:2]), axis=4)
     dx, dy = tf.meshgrid(tf.range(grid_w, dtype=tf.float32), tf.range(grid_h, dtype=tf.float32))
-    cx = (cx + tf.reshape(dx, [1, grid_h, grid_w, 1])) * self._img_w / grid_w
-    cy = (cy + tf.reshape(dy, [1, grid_h, grid_w, 1])) * self._img_h / grid_h
+    cx = (cx + tf.reshape(dx, [1, grid_h, grid_w, 1])) * float(self._img_w / grid_w)
+    cy = (cy + tf.reshape(dy, [1, grid_h, grid_w, 1])) * float(self._img_h / grid_h)
 
     x = cx - w/2
     y = cy - h/2
@@ -59,14 +61,14 @@ class YoloOutputCodec(object):
 
   def encode(self, x, y, w, h, obj, cls):
     # encode x and y
-    cx = x + w/2
-    cy = y + h/2
+    cx = x + w/2.
+    cy = y + h/2.
     dx, dy = tf.meshgrid(tf.range(grid_w, dtype=tf.float32), tf.range(grid_h, dtype=tf.float32))
-    cx = cx * grid_w / self._img_w - tf.reshape(dx, [1, grid_h, grid_w, 1])
-    cy = cy * grid_h / self._img_h - tf.reshape(dy, [1, grid_h, grid_w, 1])
+    cx = cx * float(grid_w / self._img_w) - tf.reshape(dx, [1, grid_h, grid_w, 1])
+    cy = cy * float(grid_h / self._img_h) - tf.reshape(dy, [1, grid_h, grid_w, 1])
 
     # encode w and h
-    w, h = tf.unstack(tf.log(tf.stack([w, h], 4) / self._anchors), 4)
+    w, h = tf.unstack(tf.log(tf.stack([w, h], 4) / self._anchors), axis=4)
 
     # leave obj and cls as they are (used as labels for cross-entropy)
 
